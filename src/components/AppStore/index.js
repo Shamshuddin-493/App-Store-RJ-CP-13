@@ -1,7 +1,12 @@
-import './index.css'
 import {Component} from 'react'
-import TabItem from '../TabItem'
+
 import AppItem from '../AppItem'
+import TabItem from '../TabItem'
+
+import './index.css'
+
+const SEARCH_ICON_URL =
+  'https://assets.ccbp.in/frontend/react-js/app-store/app-store-search-img.png'
 
 const tabsList = [
   {tabId: 'SOCIAL', displayText: 'Social'},
@@ -295,55 +300,72 @@ const appsList = [
 // Write your code here
 class AppStore extends Component {
   state = {
+    searchInput: '',
     activeTabId: tabsList[0].tabId,
-    searchInp: '',
   }
 
-  clickTabItem = id => {
-    this.setState({activeTabId: id})
+  setActiveTabId = tabId => {
+    this.setState({activeTabId: tabId})
   }
 
-  handleSearch = event => {
-    this.setState({searchInp: event.target.value})
+  onChangeSearchInput = event => {
+    this.setState({searchInput: event.target.value})
   }
 
-  getFilteredApps = () => {
-    const {activeTabId, searchInp} = this.state
-    const filteredApps = appsList.filter(
-      eachApp => eachApp.category === activeTabId,
+  getActiveTabApps = searchedApps => {
+    const {activeTabId} = this.state
+    const filteredApps = searchedApps.filter(
+      eachSearchedApp => eachSearchedApp.category === activeTabId,
     )
-    const searchResults = filteredApps.filter(eachApp =>
-      eachApp.appName.toLowerCase().includes(searchInp.toLowerCase()),
+
+    return filteredApps
+  }
+
+  getSearchResults = () => {
+    const {searchInput} = this.state
+    const searchResults = appsList.filter(eachApp =>
+      eachApp.appName.toLowerCase().includes(searchInput.toLowerCase()),
     )
+
     return searchResults
   }
 
   render() {
-    const {activeTabId} = this.state
-    const filteredApps = this.getFilteredApps()
+    const {searchInput, activeTabId} = this.state
+    const searchResults = this.getSearchResults()
+    const filteredApps = this.getActiveTabApps(searchResults)
 
     return (
-      <div>
-        <div>
-          <h1>App Store</h1>
-          <input
-            type="search"
-            placeholder="Search"
-            onChange={this.handleSearch}
-          />
-          <ul>
+      <div className="app-container">
+        <div className="app-store">
+          <h1 className="heading">App Store</h1>
+          <div className="search-input-container">
+            <input
+              type="search"
+              placeholder="Search"
+              className="search-input"
+              value={searchInput}
+              onChange={this.onChangeSearchInput}
+            />
+            <img
+              src={SEARCH_ICON_URL}
+              alt="search icon"
+              className="search-icon"
+            />
+          </div>
+          <ul className="tabs-list">
             {tabsList.map(eachTab => (
               <TabItem
-                tabDetails={eachTab}
-                isActive={activeTabId === eachTab.tabId}
-                clickTabItem={this.clickTabItem}
                 key={eachTab.tabId}
+                tabDetails={eachTab}
+                setActiveTabId={this.setActiveTabId}
+                isActive={activeTabId === eachTab.tabId}
               />
             ))}
           </ul>
-          <ul>
-            {filteredApps.map(eachResult => (
-              <AppItem appDetails={eachResult} key={eachResult.appId} />
+          <ul className="apps-list">
+            {filteredApps.map(eachApp => (
+              <AppItem key={eachApp.appId} appDetails={eachApp} />
             ))}
           </ul>
         </div>
